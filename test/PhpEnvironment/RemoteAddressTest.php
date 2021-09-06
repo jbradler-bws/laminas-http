@@ -133,7 +133,22 @@ class RemoteAddressTest extends TestCase
         $_SERVER['HTTP_X_FORWARDED_FOR'] = '8.8.8.8, 10.0.0.2, 1.1.1.1, 10.0.0.1';
         $this->assertEquals('1.1.1.1', $this->remoteAddress->getIpAddress());
     }
-
+    
+    /**
+     * Test to check if fetching client IP works even with empty list of trusted proxy server.
+     * Therefore an empty list of IP addresses will be set as trsuted proxy servers.
+     *
+     * @see http://tools.ietf.org/html/draft-ietf-appsawg-http-forwarded-10#section-5.2
+     */
+    public function testGetIpAddressFromProxyFakeData()
+    {
+        $this->remoteAddress->setUseProxy(true);
+        $this->remoteAddress->setTrustedProxies([]);
+        $_SERVER['REMOTE_ADDR'] = '192.168.0.10';
+        $_SERVER['HTTP_X_FORWARDED_FOR'] = '8.8.8.8';
+        $this->assertEquals('8.8.8.8', $this->remoteAddress->getIpAddress());
+    }
+    
     /**
      * Tests if an empty string is returned if the server variable
      * REMOTE_ADDR is not set.
