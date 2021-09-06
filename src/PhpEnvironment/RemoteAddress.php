@@ -116,19 +116,22 @@ class RemoteAddress
      */
     protected function getIpAddressFromProxy()
     {
-        if (! $this->useProxy
-            || (isset($_SERVER['REMOTE_ADDR']) && ! in_array($_SERVER['REMOTE_ADDR'], $this->trustedProxies))
+        if (! $this->useProxy) {
+            return false;
+        }
+        
+        // Check optional white-list of proxy IP addresses
+        if (isset($_SERVER['REMOTE_ADDR']) && ! empty($this->trustedProxies) && ! in_array($_SERVER['REMOTE_ADDR'], $this->trustedProxies))
         ) {
             return false;
         }
 
-        $header = $this->proxyHeader;
-        if (! isset($_SERVER[$header]) || empty($_SERVER[$header])) {
+        if (! isset($_SERVER[$this->proxyHeader]) || empty($_SERVER[$this->proxyHeader])) {
             return false;
         }
 
         // Extract IPs
-        $ips = explode(',', $_SERVER[$header]);
+        $ips = explode(',', $_SERVER[$this->proxyHeader]);
         // trim, so we can compare against trusted proxies properly
         $ips = array_map('trim', $ips);
         // remove trusted proxy IPs
